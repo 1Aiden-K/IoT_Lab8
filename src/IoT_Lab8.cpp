@@ -14,12 +14,11 @@
 #include "oled-wing-adafruit.h"
 #include <Wire.h>
 #include "SparkFun_VCNL4040_Arduino_Library.h"
-
+#include <blynk.h>
 
 void setup();
 void loop();
 #line 13 "c:/Users/aiden/Desktop/IoT-Engineering/VisualStudioCodeProjects/IoT_Lab8/src/IoT_Lab8.ino"
-SYSTEM_MODE(MANUAL);
 SYSTEM_THREAD(ENABLED);
 
 bool oledVeiw = true;
@@ -34,6 +33,8 @@ OledWingAdafruit display;
 
 void setup() {
   Wire.begin();
+
+  Blynk.begin("h9VMR0qLvSa2MKcs1Xy7SXPzGGI8xFhZ", IPAddress(167, 172, 234, 162), 8080);
 
   proximitySensor.begin();
   proximitySensor.powerOnProximity();
@@ -52,6 +53,7 @@ void setup() {
 
 void loop() {
   display.loop();
+  Blynk.run();
   display.clearDisplay();
   unsigned int proximity = proximitySensor.getProximity(); 
   unsigned int ambient = proximitySensor.getAmbient(); 
@@ -59,8 +61,6 @@ void loop() {
   digitalWrite(RED_LIGHT,LOW);
   digitalWrite(YELLOW_LIGHT,LOW);
   digitalWrite(GREEN_LIGHT,LOW);
-
-
 
   if (display.pressedA()){
     oledVeiw = true;
@@ -93,13 +93,16 @@ void loop() {
       display.println(ambient);
 
     if (ambient < 1000){
-      digitalWrite(GREEN_LIGHT, HIGH);
+      digitalWrite(RED_LIGHT, HIGH);
     }else if (ambient < 2400){
       digitalWrite(YELLOW_LIGHT, HIGH);
     }else{
-      digitalWrite(RED_LIGHT, HIGH);
+      digitalWrite(GREEN_LIGHT, HIGH);
     }
     }
+  }else{
+    Blynk.virtualWrite(V0, proximity);
+    Blynk.virtualWrite(V1, ambient);
   }
 
   display.setCursor(0,0);
